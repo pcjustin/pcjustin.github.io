@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"pcjustin.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.24.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="I was refactoring the project because sometimes the project crashed. Analyzing the code I found it is the problem of memory managemnt. Sometime it use the wrong address when it free the memory. In the">
+<meta property="og:type" content="article">
+<meta property="og:title" content="What is different with malloc and sbrk">
+<meta property="og:url" content="https://pcjustin.github.io/2017/10/15/2017-10-15-what-different-with-malloc-and-sbrk/index.html">
+<meta property="og:site_name" content="Camel Rest Area">
+<meta property="og:description" content="I was refactoring the project because sometimes the project crashed. Analyzing the code I found it is the problem of memory managemnt. Sometime it use the wrong address when it free the memory. In the">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2017-10-15T06:17:11.000Z">
+<meta property="article:modified_time" content="2025-08-29T14:17:02.527Z">
+<meta property="article:author" content="Justin">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://pcjustin.github.io/2017/10/15/2017-10-15-what-different-with-malloc-and-sbrk/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-tw","comments":true,"permalink":"https://pcjustin.github.io/2017/10/15/2017-10-15-what-different-with-malloc-and-sbrk/","path":"2017/10/15/2017-10-15-what-different-with-malloc-and-sbrk/","title":"What is different with malloc and sbrk"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>What is different with malloc and sbrk | Camel Rest Area</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Camel Rest Area</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#What-is-different-with-malloc-and-sbrk"><span class="nav-number">1.</span> <span class="nav-text">What is different with malloc and sbrk?</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Justin</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://pcjustin.github.io/2017/10/15/2017-10-15-what-different-with-malloc-and-sbrk/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Justin">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Camel Rest Area">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="What is different with malloc and sbrk | Camel Rest Area">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          What is different with malloc and sbrk
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2017-10-15 14:17:11" itemprop="dateCreated datePublished" datetime="2017-10-15T14:17:11+08:00">2017-10-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2025-08-29 22:17:02" itemprop="dateModified" datetime="2025-08-29T22:17:02+08:00">2025-08-29</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><p>I was refactoring the project because sometimes the project crashed. Analyzing the code I found it is the problem of memory managemnt. Sometime it use the wrong address when it free the memory. In the project, it didn’t use <code>malloc</code> of <code>GNU C</code> library to allocate the memory and it implemented the feature.</p>
+<p>The following code is a basiclly malloc implementation from <a target="_blank" rel="noopener" href="https://stackoverflow.com/questions/5422061/malloc-implementation">stackoverflow</a>. It use <code>sbrk</code> to implement <code>malloc</code>. I was confusing why it use a low-level function to implement <code>malloc</code> allocating the memory. What is different with <code>malloc</code> and <code>sbrk</code>?</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">malloc</span><span class="params">(<span class="keyword">size_t</span> size)</span> </span>&#123;</span><br><span class="line">    size = (size + <span class="keyword">sizeof</span>(<span class="keyword">size_t</span>) + (align_to - <span class="number">1</span>)) &amp; ~ (align_to - <span class="number">1</span>);</span><br><span class="line">    free_block* block = free_block_list_head.next;</span><br><span class="line">    free_block** head = &amp;(free_block_list_head.next);</span><br><span class="line">    <span class="keyword">while</span> (block != <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (block-&gt;size &gt;= size) &#123;</span><br><span class="line">            *head = block-&gt;next;</span><br><span class="line">            <span class="keyword">return</span> ((<span class="keyword">char</span>*)block) + <span class="keyword">sizeof</span>(<span class="keyword">size_t</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        head = &amp;(block-&gt;next);</span><br><span class="line">        block = block-&gt;next;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    block = (free_block*)sbrk(size);</span><br><span class="line">    block-&gt;size = size;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> ((<span class="keyword">char</span>*)block) + <span class="keyword">sizeof</span>(<span class="keyword">size_t</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="What-is-different-with-malloc-and-sbrk"><a href="#What-is-different-with-malloc-and-sbrk" class="headerlink" title="What is different with malloc and sbrk?"></a>What is different with <code>malloc</code> and <code>sbrk</code>?</h2><p><code>sbrk</code> is a low-level function in <code>GNU C</code> library. From wikipedia said that <code>brk and sbrk are basic memory management system calls used in Unix and Unix-like operating systems to control the amount of memory allocated to the data segment of the process.</code> <code>sbrk</code> supports to allocate the memory but it isn’t flexible to use memory that means it can’t use released memory. You can follow the code and I used static memory to refactor <code>malloc</code>. The code allocated a huge array and it retured the pointer address to new block if it wasn’t released memory.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MEM_SIZE 0x10000</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> mem_pool[MEM_SIZE];</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> offset = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">new_malloc</span><span class="params">(<span class="keyword">size_t</span> size)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> *p = mem_pool;</span><br><span class="line">  size = (size + <span class="keyword">sizeof</span>(<span class="keyword">size_t</span>) + (align_to - <span class="number">1</span>)) &amp; ~ (align_to - <span class="number">1</span>);</span><br><span class="line">  free_block* block = free_block_list_head.next;</span><br><span class="line">  free_block** head = &amp;(free_block_list_head.next);</span><br><span class="line">  <span class="keyword">while</span> (block != <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">if</span> (block-&gt;size &gt;= size) &#123;</span><br><span class="line">          *head = block-&gt;next;</span><br><span class="line">          <span class="keyword">return</span> ((<span class="keyword">char</span>*)block) + <span class="keyword">sizeof</span>(<span class="keyword">size_t</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      head = &amp;(block-&gt;next);</span><br><span class="line">      block = block-&gt;next;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  block = (free_block*)(p+offset);</span><br><span class="line">  block-&gt;size = size;</span><br><span class="line">  offset += size+<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> ((<span class="keyword">char</span>*)block) + <span class="keyword">sizeof</span>(<span class="keyword">size_t</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Finally I can show you the implement code that what you want.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">free_block</span> &#123;</span></span><br><span class="line">  <span class="keyword">size_t</span> size;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">free_block</span>* <span class="title">next</span>;</span></span><br><span class="line">&#125; free_block;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> free_block free_block_list_head = &#123; <span class="number">0</span>, <span class="number">0</span> &#125;;</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">size_t</span> overhead = <span class="keyword">sizeof</span>(<span class="keyword">size_t</span>);</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">size_t</span> align_to = <span class="number">16</span>;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MEM_SIZE 0x10000</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> mem_pool[MEM_SIZE];</span><br><span class="line"><span class="keyword">static</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> offset = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">new_malloc</span><span class="params">(<span class="keyword">size_t</span> size)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> *p = mem_pool;</span><br><span class="line">  size = (size + <span class="keyword">sizeof</span>(<span class="keyword">size_t</span>) + (align_to - <span class="number">1</span>)) &amp; ~ (align_to - <span class="number">1</span>);</span><br><span class="line">  free_block* block = free_block_list_head.next;</span><br><span class="line">  free_block** head = &amp;(free_block_list_head.next);</span><br><span class="line">  <span class="keyword">while</span> (block != <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">if</span> (block-&gt;size &gt;= size) &#123;</span><br><span class="line">          *head = block-&gt;next;</span><br><span class="line">          <span class="keyword">return</span> ((<span class="keyword">char</span>*)block) + <span class="keyword">sizeof</span>(<span class="keyword">size_t</span>);</span><br><span class="line">      &#125;</span><br><span class="line">      head = &amp;(block-&gt;next);</span><br><span class="line">      block = block-&gt;next;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  block = (free_block*)(p+offset);</span><br><span class="line">  block-&gt;size = size;</span><br><span class="line">  offset += size+<span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> ((<span class="keyword">char</span>*)block) + <span class="keyword">sizeof</span>(<span class="keyword">size_t</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">new_free</span><span class="params">(<span class="keyword">void</span>* ptr)</span> </span>&#123;</span><br><span class="line">  free_block* block = (free_block*)(((<span class="keyword">char</span>*)ptr) - <span class="keyword">sizeof</span>(<span class="keyword">size_t</span>));</span><br><span class="line">  block-&gt;next = free_block_list_head.next;</span><br><span class="line">  free_block_list_head.next = block;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">void</span>* <span class="title">new_realloc</span><span class="params">(<span class="keyword">void</span>* ptr, <span class="keyword">size_t</span> size)</span> </span>&#123;</span><br><span class="line">  <span class="keyword">void</span> *new_ptr;</span><br><span class="line">  new_ptr = new_malloc(size);</span><br><span class="line">  <span class="keyword">if</span> (new_ptr == <span class="literal">NULL</span>) <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">  <span class="built_in">memcpy</span>(new_ptr, ptr, size);</span><br><span class="line">  new_free(ptr);</span><br><span class="line">  <span class="keyword">return</span> new_ptr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/10/12/2017-10-13-compare-iphone-price/" rel="prev" title="Compare iPhone Price">
+                  <i class="fa fa-angle-left"></i> Compare iPhone Price
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2017/10/21/2017-10-21-how-to-write-semaphore-on-mac/" rel="next" title="How to write semaphore on MAC">
+                  How to write semaphore on MAC <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Justin</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>

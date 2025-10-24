@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="zh-tw">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222"><meta name="generator" content="Hexo 7.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha256-VHqXKFhhMxcpubYf9xiWdCiojEbY9NexQ4jh8AxbvcM=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"pcjustin.github.io","root":"/","images":"/images","scheme":"Muse","darkmode":false,"version":"8.24.1","exturl":false,"sidebar":{"position":"left","width_expanded":320,"width_dual_column":240,"display":"post","padding":18,"offset":12},"hljswrap":true,"codeblock":{"theme":{"light":"default","dark":"stackoverflow-dark"},"prism":{"light":"prism","dark":"prism-dark"},"copy_button":{"enable":false,"style":null},"fold":{"enable":false,"height":500},"language":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":false,"duration":200,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"i18n":{"placeholder":"Searching...","empty":"We didn't find any results for the search: ${query}","hits_time":"${hits} results found in ${time} ms","hits":"${hits} results found"}}</script><script src="/js/config.js" defer></script>
+
+    <meta name="description" content="安裝 k3s 在 Node1  123curl -sfL https:&#x2F;&#x2F;get.k3s.io | sh -sudo k3s kubectl get nodessudo cat &#x2F;var&#x2F;lib&#x2F;rancher&#x2F;k3s&#x2F;server&#x2F;node-token   安裝 k3s-agent 在 Node2  1curl -sfL https:&#x2F;&#x2F;get.k3s.io | K3S_URL&#x3D;https:&#x2F;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何使用k3s部署gitlab ce">
+<meta property="og:url" content="https://pcjustin.github.io/2025/08/27/2025-08-28-%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8k3s%E9%83%A8%E7%BD%B2gitlab-ce/index.html">
+<meta property="og:site_name" content="Camel Rest Area">
+<meta property="og:description" content="安裝 k3s 在 Node1  123curl -sfL https:&#x2F;&#x2F;get.k3s.io | sh -sudo k3s kubectl get nodessudo cat &#x2F;var&#x2F;lib&#x2F;rancher&#x2F;k3s&#x2F;server&#x2F;node-token   安裝 k3s-agent 在 Node2  1curl -sfL https:&#x2F;&#x2F;get.k3s.io | K3S_URL&#x3D;https:&#x2F;">
+<meta property="og:locale" content="zh_TW">
+<meta property="article:published_time" content="2025-08-27T08:51:22.000Z">
+<meta property="article:modified_time" content="2025-08-29T14:17:02.528Z">
+<meta property="article:author" content="Justin">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://pcjustin.github.io/2025/08/27/2025-08-28-%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8k3s%E9%83%A8%E7%BD%B2gitlab-ce/">
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-tw","comments":true,"permalink":"https://pcjustin.github.io/2025/08/27/2025-08-28-%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8k3s%E9%83%A8%E7%BD%B2gitlab-ce/","path":"2025/08/27/2025-08-28-如何使用k3s部署gitlab-ce/","title":"如何使用k3s部署gitlab ce"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>如何使用k3s部署gitlab ce | Camel Rest Area</title>
+  
+
+
+
+
+
+
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous" defer></script>
+<script src="/js/utils.js" defer></script><script src="/js/motion.js" defer></script><script src="/js/sidebar.js" defer></script><script src="/js/next-boot.js" defer></script>
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar" role="button">
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">Camel Rest Area</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="Search" role="button">
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Justin</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">22</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-tw">
+    <link itemprop="mainEntityOfPage" href="https://pcjustin.github.io/2025/08/27/2025-08-28-%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8k3s%E9%83%A8%E7%BD%B2gitlab-ce/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Justin">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Camel Rest Area">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="如何使用k3s部署gitlab ce | Camel Rest Area">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          如何使用k3s部署gitlab ce
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">Posted on</span>
+
+      <time title="Created: 2025-08-27 16:51:22" itemprop="dateCreated datePublished" datetime="2025-08-27T16:51:22+08:00">2025-08-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">Edited on</span>
+      <time title="Modified: 2025-08-29 22:17:02" itemprop="dateModified" datetime="2025-08-29T22:17:02+08:00">2025-08-29</time>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody"><ol>
+<li>安裝 <code>k3s</code> 在 <code>Node1</code></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl -sfL https://get.k3s.io | sh -</span><br><span class="line">sudo k3s kubectl get nodes</span><br><span class="line">sudo cat /var/lib/rancher/k3s/server/node-token</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>安裝 <code>k3s-agent</code> 在 <code>Node2</code></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl -sfL https://get.k3s.io | K3S_URL=https://10.0.0.1:6443 K3S_TOKEN=&lt;TOKEN&gt; sh -</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>安裝 <code>Helm</code> 在 <code>Node1</code></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash</span><br><span class="line">helm version</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>加入 Gitlab Helm repo 在 <code>Node1</code></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">helm repo add gitlab https://charts.gitlab.io/</span><br><span class="line">helm repo update</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>建立命名空間在 <code>Node1</code></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo k3s kubectl create namespace gitlab</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li>建立設定檔 <code>values.yaml</code>在 <code>Node1</code></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p gitlab</span><br><span class="line"></span><br><span class="line">vim values.yaml</span><br><span class="line"># values.yaml</span><br><span class="line">global:</span><br><span class="line">  hosts:</span><br><span class="line">    domain: gitlab.local</span><br><span class="line">    https: true</span><br><span class="line">  edition: ce</span><br><span class="line">  ingress:</span><br><span class="line">    configureCertmanager: false</span><br><span class="line"></span><br><span class="line">nginx-ingress:</span><br><span class="line">  enabled: true</span><br><span class="line"></span><br><span class="line">gitlab-runner:</span><br><span class="line">  install: false</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<ol start="7">
+<li>安裝 <code>GitLab Server</code></li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">helm upgrade --install gitlab gitlab/gitlab -n gitlab -f values.yaml</span><br></pre></td></tr></table></figure>
+
+<ol start="8">
+<li>等待 Pod 啟動</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo k3s kubectl get pods -n gitlab</span><br></pre></td></tr></table></figure>
+
+<ol start="9">
+<li>取得 root 密碼</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo k3s kubectl get secret gitlab-gitlab-initial-root-password -n gitlab -ojsonpath=&#x27;&#123;.data.password&#125;&#x27; | base64 -d</span><br></pre></td></tr></table></figure>
+
+<ol start="10">
+<li>確認 k3s 狀態</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo k3s kubectl get nodes -o wide</span><br></pre></td></tr></table></figure>
+
+<ol start="11">
+<li>讓 Helm 用對的 kubeconfig</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mkdir -p ~/.kube</span><br><span class="line">sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config</span><br><span class="line">sudo chown $USER:$USER ~/.kube/config</span><br></pre></td></tr></table></figure>
+
+<ol start="12">
+<li><p>修改 <code>~/.kube/config</code>，<code>127.0.0.1</code> 改成 Node1 IP</p>
+</li>
+<li><p>確認 kubectl正常</p>
+</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">export KUBECONFIG=&quot;$HOME/.kube/config&quot;</span><br><span class="line">kubectl config get-contexts</span><br><span class="line">kubectl get ns</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>(Optional) 如何刪除 Pod</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n gitlab delete pod -l app=registry</span><br><span class="line">kubectl -n gitlab delete pod -l app=webservice</span><br><span class="line">kubectl -n gitlab delete pod -l app=sidekiq</span><br><span class="line"></span><br><span class="line">kubectl -n gitlab get pods</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>(Optional) Node hostname 不能一樣</li>
+</ul>
+<ol start="14">
+<li>加入 Node1 IP在PC上</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;192.168.1.10 gitlab.gitlab.local registry.gitlab.local minio.gitlab.local kas.gitlab.local&quot; | sudo tee -a /etc/hosts</span><br><span class="line"></span><br><span class="line">curl -k -I -H &quot;Host: gitlab.gitlab.local&quot; https://&lt;任一節點IP&gt;:30721/</span><br></pre></td></tr></table></figure>
+
+<ol start="15">
+<li>啟用 ServiceLB 做到可以直接連線 80&#x2F;443 在 Node1</li>
+</ol>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl cat k3s | grep -i servicelb -n || true</span><br></pre></td></tr></table></figure>
+
+<p>用 systemd drop-in 覆蓋 ExecStart</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl edit k3s</span><br><span class="line"># 進入編輯器後貼上（這會清掉舊的 ExecStart，請保留你需要的其他參數）</span><br><span class="line">[Service]</span><br><span class="line">ExecStart=</span><br><span class="line">ExecStart=/usr/local/bin/k3s server --write-kubeconfig-mode 644</span><br></pre></td></tr></table></figure>
+
+<p>套用並重啟：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl restart k3s</span><br></pre></td></tr></table></figure>
+
+<p>把 GitLab 的 Ingress Service 切成 LoadBalancer</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">helm upgrade --install gitlab gitlab/gitlab -n gitlab -f values.yaml \</span><br><span class="line">  --set nginx-ingress.controller.service.type=LoadBalancer \</span><br><span class="line">  --set nginx-ingress.controller.service.ports.gitlab-shell=2222 \</span><br><span class="line">  --set global.shell.port=2222 \</span><br><span class="line">  --set nginx-ingress.controller.service.nodePorts.http=null \</span><br><span class="line">  --set nginx-ingress.controller.service.nodePorts.https=null \</span><br><span class="line">  --set nginx-ingress.controller.service.nodePorts.gitlab-shell=null</span><br></pre></td></tr></table></figure>
+
+<p>幾秒後查看 EXTERNAL-IP（會是某個節點的實體 IP，或兩個節點都列出）</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n gitlab get svc gitlab-nginx-ingress-controller</span><br></pre></td></tr></table></figure>
+
+<p>在你的用戶端把 DNS&#x2F;hosts 指到這個 EXTERNAL-IP</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;&lt;EXTERNAL-IP&gt; gitlab.gitlab.local registry.gitlab.local minio.gitlab.local kas.gitlab.local&quot; | sudo tee -a /etc/hosts</span><br></pre></td></tr></table></figure>
+
+<p>測試 Gitlab</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">curl -I -H &quot;Host: gitlab.gitlab.local&quot; http://&lt;EXTERNAL-IP&gt;/</span><br><span class="line"></span><br><span class="line">curl -k -I -H &quot;Host: gitlab.gitlab.local&quot; https://&lt;EXTERNAL-IP&gt;/</span><br></pre></td></tr></table></figure>
+
+<p>測試 SSH</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -p 2222 git@gitlab.gitlab.local</span><br></pre></td></tr></table></figure>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2017/12/14/2017-12-12-how-to-install-homebridge-on-raspberry/" rel="prev" title="How to install homebridge on raspberry">
+                  <i class="fa fa-angle-left"></i> How to install homebridge on raspberry
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2025/10/14/2025-10-14-%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8n8n%E9%83%A8%E7%BD%AEgitlab-cicd-status%E5%88%B0teams/" rel="next" title="如何使用n8n部置gitlab cicd status到teams">
+                  如何使用n8n部置gitlab cicd status到teams <i class="fa fa-angle-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+  <div class="copyright">
+    &copy; 
+    <span itemprop="copyrightYear">2025</span>
+    <span class="with-love">
+      <i class="fa fa-heart"></i>
+    </span>
+    <span class="author" itemprop="copyrightHolder">Justin</span>
+  </div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/muse/" rel="noopener" target="_blank">NexT.Muse</a>
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="toggle sidebar-toggle" role="button">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+  <div class="sidebar-dimmer"></div>
+  <div class="back-to-top" role="button" aria-label="Back to top">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+</body>
+</html>
